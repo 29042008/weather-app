@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="weather style.css">
+</head>
+<body>
+
+<video id="backgroundVideo" autoplay muted loop playsinline>
+    <source id="videoSource" src="" type="video/mp4">
+</video>
+
+<div class="card">
+    <div class="search">
+        <input class="text" placeholder="Enter city name" spellcheck="false">
+        <button>
+            <img src="https://www.freeiconspng.com/uploads/search-icon-png-21.png" alt="Search">
+        </button>
+    </div>
+    <div class="error">
+        <p>Invalid City Name</p>
+    </div>
+    <div class="weather" style="display: none;">
+        <img src="https://www.flaticon.com/free-icon/cloudy_1163661" class="weather-icon">
+        <h1 class="temp">22°c</h1>
+        <h2 class="city">New York</h2>
+        <div class="details">
+            <div class="col left">
+                <img src="./assets/wind.png" alt="Humidity">
+
+                <div>
+                    <p class="humidity">50%</p>
+                    <p>Humidity</p>
+                </div>
+            </div>
+            <div class="col right">
+                <img src="./assets/humidity.png" alt="Wind Speed">
+
+                <div>
+                    <p class="wind">15 km/h</p>
+                    <p>Wind Speed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const apiKey = "eaec97510b56bf326e7db34b9068ea7f";
+const apiUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&q=`;
+
+const searchBox = document.querySelector(".search input");
+const searchBtn = document.querySelector(".search button");
+const weatherIcon = document.querySelector(".weather-icon");
+const backgroundVideo = document.getElementById("backgroundVideo");
+const videoSource = document.getElementById("videoSource");
+
+async function checkWeather(city) {
+    try {
+        const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+        if (!response.ok) {
+            throw new Error("City not found");
+        }
+
+        const data = await response.json();
+
+        // Update weather data
+        document.querySelector(".city").innerText = data.name;
+        document.querySelector(".temp").innerText = Math.round(data.main.temp) + "°c";
+        document.querySelector(".humidity").innerText = data.main.humidity + "%";
+        document.querySelector(".wind").innerText = data.wind.speed + " km/h";
+
+        // Update weather icon and background video based on weather condition and temperature
+        updateWeatherDisplay(data.weather[0].main, data.main.temp);
+
+        // Display weather and hide error
+        document.querySelector(".weather").style.display = "block";
+        document.querySelector(".error").style.display = "none";
+    } catch (error) {
+        // Handle invalid city name
+        document.querySelector(".error").style.display = "block";
+        document.querySelector(".weather").style.display = "none";
+    }
+}
+
+function updateWeatherDisplay(condition, temp) {
+    if (temp < 0) {
+        weatherIcon.src = "./assets/snow-cloud.png";
+        changeVideo("https://videos.pexels.com/video-files/854890/854890-uhd_2560_1440_30fps.mp4");
+    } else if (condition === "Clouds") {
+        weatherIcon.src = "./assets/cloudy.png";
+        changeVideo("https://videos.pexels.com/video-files/855507/855507-hd_1920_1080_25fps.mp4");
+    } else if (condition === "Clear") {
+        weatherIcon.src = "./assets/day.png";
+        changeVideo("https://media.istockphoto.com/id/675934872/video/timelapse-of-the-clear-sky.mp4?s=mp4-640x640-is&k=20&c=K8fVrEBhsi2vnQUAOhxXzhAYoPbAY0p7sesJiX-m3ho=");
+    } else if (condition === "Rain") {
+        weatherIcon.src = "./assets/heavy-rain.png";
+        changeVideo("https://videos.pexels.com/video-files/8249126/8249126-uhd_2560_1440_24fps.mp4");
+    } else if (condition === "Drizzle") {
+        weatherIcon.src = "./assets/drizzle.png";
+        changeVideo("https://videos.pexels.com/video-files/4933583/4933583-hd_1280_720_30fps.mp4");
+    } else if (condition === "Mist") {
+        weatherIcon.src = "./assets/haze.png";
+        changeVideo("https://videos.pexels.com/video-files/854890/854890-uhd_2560_1440_30fps.mp4");
+    } else if (condition === "Snow") {
+        weatherIcon.src = "./assets/snow.png";
+        changeVideo("https://videos.pexels.com/video-files/854890/854890-uhd_2560_1440_30fps.mp4");
+    }
+}
+
+function changeVideo(src) {
+    if (videoSource.src !== src) {
+        videoSource.src = src;
+        backgroundVideo.load();
+        backgroundVideo.play();
+    }
+}
+
+// Search button click event
+searchBtn.addEventListener("click", () => {
+    if (searchBox.value) {
+        checkWeather(searchBox.value);
+    }
+});
+</script>
+
+</body>
+</html>
